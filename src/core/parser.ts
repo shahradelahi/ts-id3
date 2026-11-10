@@ -4,6 +4,7 @@ import { parseCommFrame } from '../frames/comm';
 import { readID3v1Tag } from '../frames/id3v1';
 import { parseTextFrame } from '../frames/text';
 import { parseTxxxFrame } from '../frames/txxx';
+import { parseUsltFrame } from '../frames/uslt';
 import type { ID3RawFrame, ID3Tag, ID3UserDefinedText, ReadOptions } from '../typings';
 import { decodeSyncSafe, decodeUint32 } from '../utils/sync-safe';
 import { ByteReader } from './ByteReader';
@@ -87,6 +88,11 @@ export function readTags(buffer: Uint8Array, options: ReadOptions = {}): ID3Tag 
         const comm = parseCommFrame(frameData);
         if (comm) {
           result.comment = comm;
+        }
+      } else if (id === 'USLT' || id === 'ULT') {
+        const uslt = parseUsltFrame(frameData);
+        if (uslt) {
+          result.unsynchronisedLyrics = uslt;
         }
       } else if (id === 'TXXX' || id === 'TXX') {
         const txxx = parseTxxxFrame(frameData);

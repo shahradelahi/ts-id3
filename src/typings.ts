@@ -13,6 +13,12 @@ export interface ID3Comment {
   text: string;
 }
 
+export interface ID3UnsynchronisedLyrics {
+  language?: string;
+  shortDescription?: string;
+  text: string;
+}
+
 export interface ID3UserDefinedText {
   description: string;
   value: string;
@@ -36,6 +42,8 @@ export interface ID3Tag {
   disc?: string;
   albumArtist?: string;
   comment?: ID3Comment | string;
+  unsynchronisedLyrics?: ID3UnsynchronisedLyrics | string;
+  lyrics?: ID3UnsynchronisedLyrics | string;
   image?: ID3Picture;
   userDefinedText?: ID3UserDefinedText | ID3UserDefinedText[];
   rawFrames?: ID3RawFrame[];

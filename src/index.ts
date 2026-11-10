@@ -12,6 +12,7 @@ export type {
   ID3Picture,
   ID3RawFrame,
   ID3Tag,
+  ID3UnsynchronisedLyrics,
   ID3UserDefinedText,
   ReadOptions,
   WriteOptions,
