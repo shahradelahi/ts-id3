@@ -90,6 +90,10 @@ const updatedBuffer = updateTags(fileBuffer, {
 const cleanedBuffer = removeTags(fileBuffer);
 ```
 
+## 📚 Documentation
+
+For all configuration options, please see [the API docs](https://www.jsdocs.io/package/@se-oss/id3).
+
 ## 🤝 Contributing
 
 Want to contribute? Star the project or raise issues on [GitHub](https://github.com/shahradelahi/ts-id3).

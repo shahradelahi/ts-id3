@@ -3,6 +3,7 @@ import { buildApicFrame } from '../frames/apic';
 import { buildCommFrame } from '../frames/comm';
 import { buildTextFrame } from '../frames/text';
 import { buildTxxxFrame } from '../frames/txxx';
+import { buildUsltFrame } from '../frames/uslt';
 import type { ID3Tag, WriteOptions } from '../typings';
 import { ByteWriter } from './ByteWriter';
 import { writeID3Header } from './header';
@@ -76,6 +77,14 @@ export function writeTags(tags: ID3Tag, options: WriteOptions = {}): Uint8Array 
   if (tags.comment !== undefined) {
     const payload = buildCommFrame(tags.comment, ID3TextEncoding.UTF_8);
     const frameBytes = buildFrame('COMM', payload, version);
+    framesWriter.writeBytes(frameBytes);
+  }
+
+  // Unsynchronised Lyrics frame
+  const lyricsVal = tags.unsynchronisedLyrics ?? tags.lyrics;
+  if (lyricsVal !== undefined) {
+    const payload = buildUsltFrame(lyricsVal, ID3TextEncoding.UTF_8);
+    const frameBytes = buildFrame('USLT', payload, version);
     framesWriter.writeBytes(frameBytes);
   }
 

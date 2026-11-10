@@ -54,6 +54,8 @@ export const FRAME_ALIAS_MAP: Record<string, string> = {
   TP2: 'albumArtist',
   COMM: 'comment',
   COM: 'comment',
+  USLT: 'unsynchronisedLyrics',
+  ULT: 'unsynchronisedLyrics',
   APIC: 'image',
   PIC: 'image',
   TXXX: 'userDefinedText',
@@ -71,6 +73,8 @@ export const ALIAS_FRAME_MAP: Record<string, string> = {
   disc: 'TPOS',
   albumArtist: 'TPE2',
   comment: 'COMM',
+  unsynchronisedLyrics: 'USLT',
+  lyrics: 'USLT',
   image: 'APIC',
   userDefinedText: 'TXXX',
 };

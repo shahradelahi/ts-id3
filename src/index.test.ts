@@ -101,6 +101,11 @@ describe('ID3 Parsing & Building', () => {
         description: 'ISRC',
         value: 'US1234567890',
       },
+      unsynchronisedLyrics: {
+        language: 'eng',
+        shortDescription: '',
+        text: 'Line 1\nLine 2',
+      },
     };
 
     const id3Buffer = writeTags(tags);
@@ -111,6 +116,8 @@ describe('ID3 Parsing & Building', () => {
     expect((parsed.comment as any).text).toBe('This is a test comment.');
     expect((parsed.userDefinedText as any).description).toBe('ISRC');
     expect((parsed.userDefinedText as any).value).toBe('US1234567890');
+    expect(typeof parsed.unsynchronisedLyrics).toBe('object');
+    expect((parsed.unsynchronisedLyrics as any).text).toBe('Line 1\nLine 2');
   });
 
   test('should update and remove tags from audio buffers', () => {
