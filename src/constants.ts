@@ -1,0 +1,76 @@
+export enum ID3TextEncoding {
+  ISO_8859_1 = 0,
+  UTF_16 = 1,
+  UTF_16BE = 2,
+  UTF_8 = 3,
+}
+
+export enum ID3PictureType {
+  OTHER = 0,
+  FILE_ICON = 1,
+  OTHER_FILE_ICON = 2,
+  FRONT_COVER = 3,
+  BACK_COVER = 4,
+  LEAFLET_PAGE = 5,
+  MEDIA = 6,
+  LEAD_ARTIST = 7,
+  ARTIST = 8,
+  CONDUCTOR = 9,
+  BAND = 10,
+  COMPOSER = 11,
+  LYRICIST = 12,
+  RECORDING_LOCATION = 13,
+  DURING_RECORDING = 14,
+  DURING_PERFORMANCE = 15,
+  MOVIE_SCREEN_CAPTURE = 16,
+  A_BRIGHT_COLOURED_FISH = 17,
+  ILLUSTRATION = 18,
+  BAND_LOGOTYPE = 19,
+  PUBLISHER_LOGOTYPE = 20,
+}
+
+export const ID3V2_HEADER_SIZE = 10;
+export const ID3V1_TAG_SIZE = 128;
+
+export const FRAME_ALIAS_MAP: Record<string, string> = {
+  TIT2: 'title',
+  TT2: 'title',
+  TPE1: 'artist',
+  TP1: 'artist',
+  TALB: 'album',
+  TAL: 'album',
+  TRCK: 'track',
+  TRK: 'track',
+  TYER: 'year',
+  TYE: 'year',
+  TDRC: 'year',
+  TCON: 'genre',
+  TCO: 'genre',
+  TCOM: 'composer',
+  TCM: 'composer',
+  TPOS: 'disc',
+  TPA: 'disc',
+  TPE2: 'albumArtist',
+  TP2: 'albumArtist',
+  COMM: 'comment',
+  COM: 'comment',
+  APIC: 'image',
+  PIC: 'image',
+  TXXX: 'userDefinedText',
+  TXX: 'userDefinedText',
+};
+
+export const ALIAS_FRAME_MAP: Record<string, string> = {
+  title: 'TIT2',
+  artist: 'TPE1',
+  album: 'TALB',
+  track: 'TRCK',
+  year: 'TYER',
+  genre: 'TCON',
+  composer: 'TCOM',
+  disc: 'TPOS',
+  albumArtist: 'TPE2',
+  comment: 'COMM',
+  image: 'APIC',
+  userDefinedText: 'TXXX',
+};
