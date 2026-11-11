@@ -1,3 +1,6 @@
+/**
+ * Decode 28-bit sync-safe integer from 4 bytes.
+ */
 export function decodeSyncSafe(bytes: Uint8Array): number {
   const b0 = bytes[0] ?? 0;
   const b1 = bytes[1] ?? 0;
@@ -6,6 +9,9 @@ export function decodeSyncSafe(bytes: Uint8Array): number {
   return ((b0 & 0x7f) << 21) | ((b1 & 0x7f) << 14) | ((b2 & 0x7f) << 7) | (b3 & 0x7f);
 }
 
+/**
+ * Encode integer into 4-byte sync-safe format.
+ */
 export function encodeSyncSafe(size: number): Uint8Array {
   return new Uint8Array([
     (size >> 21) & 0x7f,
@@ -15,6 +21,9 @@ export function encodeSyncSafe(size: number): Uint8Array {
   ]);
 }
 
+/**
+ * Decode 32-bit big-endian integer from 4 bytes.
+ */
 export function decodeUint32(bytes: Uint8Array): number {
   const b0 = bytes[0] ?? 0;
   const b1 = bytes[1] ?? 0;
@@ -23,6 +32,9 @@ export function decodeUint32(bytes: Uint8Array): number {
   return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
 }
 
+/**
+ * Encode integer into 4-byte big-endian Uint8Array.
+ */
 export function encodeUint32(value: number): Uint8Array {
   return new Uint8Array([
     (value >> 24) & 0xff,

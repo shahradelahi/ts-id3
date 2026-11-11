@@ -4,6 +4,9 @@ import { decodeSyncSafe, encodeSyncSafe } from '../utils/sync-safe';
 import { ByteReader } from './ByteReader';
 import { ByteWriter } from './ByteWriter';
 
+/**
+ * Read and validate 10-byte ID3v2 header from ByteReader.
+ */
 export function readID3Header(reader: ByteReader): ID3HeaderInfo | null {
   if (reader.remaining < ID3V2_HEADER_SIZE) {
     return null;
@@ -38,6 +41,9 @@ export function readID3Header(reader: ByteReader): ID3HeaderInfo | null {
   };
 }
 
+/**
+ * Write 10-byte ID3v2 header.
+ */
 export function writeID3Header(size: number, version: '2.3' | '2.4' = '2.3'): Uint8Array {
   const writer = new ByteWriter();
   // "ID3"

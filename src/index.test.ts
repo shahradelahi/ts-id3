@@ -140,4 +140,97 @@ describe('ID3 Parsing & Building', () => {
     expect(cleanedParsed.title).toBeUndefined();
     expect(cleanedBuffer.length).toBe(fakeAudio.length);
   });
+
+  test('should write and read newly supported frames (SYLT, POPM, PRIV, UFID, CHAP, CTOC, WXXX, ETCO, COMR, GEOB, URL)', () => {
+    const tags = {
+      title: 'Advanced Tags',
+      synchronisedLyrics: {
+        language: 'eng',
+        timeStampFormat: 2,
+        contentType: 1,
+        shortDescription: 'Chorus',
+        synchronisedText: [
+          { text: 'Hello', timeStamp: 1000 },
+          { text: 'World', timeStamp: 2000 },
+        ],
+      },
+      popularimeter: {
+        email: 'user@example.com',
+        rating: 128,
+        counter: 42,
+      },
+      private: {
+        ownerIdentifier: 'com.example.app',
+        data: new Uint8Array([1, 2, 3, 4]),
+      },
+      uniqueFileIdentifier: {
+        ownerIdentifier: 'http://example.com/id',
+        identifier: new Uint8Array([10, 20, 30]),
+      },
+      chapter: {
+        elementID: 'ch1',
+        startTimeMs: 0,
+        endTimeMs: 10000,
+        tags: {
+          title: 'Chapter 1',
+        },
+      },
+      tableOfContents: {
+        elementID: 'toc1',
+        isOrdered: true,
+        elements: ['ch1'],
+        tags: {
+          title: 'Table of Contents',
+        },
+      },
+      userDefinedUrl: {
+        description: 'Homepage',
+        url: 'https://example.com',
+      },
+      eventTimingCodes: {
+        timeStampFormat: 2,
+        keyEvents: [{ type: 1, timeStamp: 500 }],
+      },
+      commercialFrame: {
+        prices: { USD: '9.99' },
+        validUntil: { year: 2030, month: 12, day: 31 },
+        contactUrl: 'https://store.example.com',
+        receivedAs: 1,
+        nameOfSeller: 'Acme Music',
+        description: 'Digital Download',
+      },
+      generalObject: {
+        mimeType: 'application/octet-stream',
+        filename: 'data.bin',
+        contentDescription: 'Binary payload',
+        encapsulatedObject: new Uint8Array([5, 6, 7, 8]),
+      },
+      commercialUrl: 'https://buy.example.com',
+    };
+
+    const id3Buffer = writeTags(tags as any);
+    const parsed = readTags(id3Buffer);
+
+    expect(parsed.title).toBe('Advanced Tags');
+    expect((parsed.synchronisedLyrics as any).language).toBe('eng');
+    expect((parsed.synchronisedLyrics as any).synchronisedText).toHaveLength(2);
+    expect((parsed.popularimeter as any).email).toBe('user@example.com');
+    expect((parsed.popularimeter as any).rating).toBe(128);
+    expect((parsed.popularimeter as any).counter).toBe(42);
+    expect((parsed.private as any).ownerIdentifier).toBe('com.example.app');
+    expect(Array.from((parsed.private as any).data)).toEqual([1, 2, 3, 4]);
+    expect((parsed.uniqueFileIdentifier as any).ownerIdentifier).toBe('http://example.com/id');
+    expect(Array.from((parsed.uniqueFileIdentifier as any).identifier)).toEqual([10, 20, 30]);
+    expect((parsed.chapter as any).elementID).toBe('ch1');
+    expect((parsed.chapter as any).tags?.title).toBe('Chapter 1');
+    expect((parsed.tableOfContents as any).elementID).toBe('toc1');
+    expect((parsed.tableOfContents as any).elements).toEqual(['ch1']);
+    expect((parsed.tableOfContents as any).tags?.title).toBe('Table of Contents');
+    expect((parsed.userDefinedUrl as any).description).toBe('Homepage');
+    expect((parsed.userDefinedUrl as any).url).toBe('https://example.com');
+    expect((parsed.eventTimingCodes as any).keyEvents).toHaveLength(1);
+    expect((parsed.commercialFrame as any).nameOfSeller).toBe('Acme Music');
+    expect((parsed.generalObject as any).filename).toBe('data.bin');
+    expect(parsed.commercialUrl as any).toBe('https://buy.example.com');
+  });
 });

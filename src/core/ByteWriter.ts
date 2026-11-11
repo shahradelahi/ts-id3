@@ -1,3 +1,6 @@
+/**
+ * Sequential binary byte builder for Uint8Array buffers.
+ */
 export class ByteWriter {
   #chunks: Uint8Array[] = [];
   #size = 0;

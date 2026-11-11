@@ -1,5 +1,8 @@
 import { ID3Error } from '../errors';
 
+/**
+ * Sequential binary byte reader for Uint8Array buffers.
+ */
 export class ByteReader {
   #bytes: Uint8Array;
   #view: DataView;

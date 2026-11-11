@@ -5,6 +5,9 @@ import { ByteReader } from './ByteReader';
 import { readID3Header } from './header';
 import { readTags } from './parser';
 
+/**
+ * Remove ID3v2 and ID3v1 tags from an audio file buffer.
+ */
 export function removeTags(buffer: Uint8Array): Uint8Array {
   const reader = new ByteReader(buffer);
   const header = readID3Header(reader);
@@ -33,6 +36,14 @@ export function removeTags(buffer: Uint8Array): Uint8Array {
   return buffer.subarray(startOffset, endOffset);
 }
 
+/**
+ * Update ID3 tags in an audio file buffer by merging new tags with existing ones.
+ *
+ * @example
+ * ```ts
+ * const updatedBuffer = updateTags(fileBuffer, { title: 'Updated Title' });
+ * ```
+ */
 export function updateTags(
   buffer: Uint8Array,
   newTags: ID3Tag,
