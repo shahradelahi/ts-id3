@@ -30,7 +30,7 @@ import type {
   ID3UserDefinedUrl,
   ReadOptions,
 } from '../typings';
-import { decodeSyncSafe, decodeUint32 } from '../utils/sync-safe';
+import { decodeSyncSafe, decodeUint32, removeUnsynchronisation } from '../utils/sync-safe';
 import { ByteReader } from './ByteReader';
 import { readID3Header } from './header';
 
@@ -95,7 +95,10 @@ export function parseID3Body(
       break;
     }
 
-    const frameData = reader.readBytes(frameSize);
+    let frameData = reader.readBytes(frameSize);
+    if (isV2_4 && (flags & 0x0002) !== 0) {
+      frameData = removeUnsynchronisation(frameData);
+    }
 
     if (options.includeRawFrames) {
       rawFrames.push({ id, size: frameSize, flags, data: frameData });
@@ -229,19 +232,28 @@ export function readTags(buffer: Uint8Array, options: ReadOptions = {}): ID3Tag 
     const isV2_4 = header.version.major === 4;
     const tagEndOffset = ID3V2_HEADER_SIZE + header.size;
 
-    if (header.flags.extendedHeader) {
-      if (reader.remaining >= 4) {
-        const extSize = isV2_4
-          ? decodeSyncSafe(reader.readBytes(4))
-          : decodeUint32(reader.readBytes(4));
-        reader.skip(extSize - 4);
-      }
-    }
-
     const bodyLen = tagEndOffset - reader.offset;
     if (bodyLen > 0 && reader.remaining >= bodyLen) {
-      const bodyBytes = reader.readBytes(bodyLen);
-      result = parseID3Body(bodyBytes, isV2_2, isV2_4, options);
+      let bodyBytes = reader.readBytes(bodyLen);
+      if (header.flags.unsynchronisation) {
+        bodyBytes = removeUnsynchronisation(bodyBytes);
+      }
+
+      const bodyReader = new ByteReader(bodyBytes);
+
+      if (header.flags.extendedHeader) {
+        if (bodyReader.remaining >= 4) {
+          const extSize = isV2_4
+            ? decodeSyncSafe(bodyReader.readBytes(4))
+            : decodeUint32(bodyReader.readBytes(4));
+          if (extSize >= 4 && bodyReader.remaining >= extSize - 4) {
+            bodyReader.skip(extSize - 4);
+          }
+        }
+      }
+
+      const frameBytes = bodyReader.readBytes(bodyReader.remaining);
+      result = parseID3Body(frameBytes, isV2_2, isV2_4, options);
     }
   }
 

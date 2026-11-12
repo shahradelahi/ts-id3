@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  applyUnsynchronisation,
   ByteReader,
   ByteWriter,
   decodeSyncSafe,
@@ -8,6 +9,7 @@ import {
   ID3PictureType,
   readTags,
   removeTags,
+  removeUnsynchronisation,
   updateTags,
   writeTags,
 } from './index';
@@ -21,6 +23,79 @@ describe('Sync-Safe Integer Utils', () => {
       const decoded = decodeSyncSafe(encoded);
       expect(decoded).toBe(val);
     }
+  });
+});
+
+describe('Unsynchronisation Utils & Tag-Wide Handling', () => {
+  test('should correctly apply and remove unsynchronisation', () => {
+    const raw = new Uint8Array([0xff, 0xfe, 0xff, 0x00, 0xff, 0xe0, 0x01, 0xff]);
+    const unsynced = applyUnsynchronisation(raw);
+    expect(unsynced).toEqual(
+      new Uint8Array([0xff, 0x00, 0xfe, 0xff, 0x00, 0x00, 0xff, 0x00, 0xe0, 0x01, 0xff, 0x00])
+    );
+    const restored = removeUnsynchronisation(unsynced);
+    expect(restored).toEqual(raw);
+  });
+
+  test('should parse tag-wide unsynchronised ID3v2.3 tags correctly', () => {
+    function unsync(b: Uint8Array): Uint8Array {
+      return applyUnsynchronisation(b);
+    }
+
+    const makeFrame = (id: string, data: Uint8Array) => {
+      const h = new Uint8Array(10);
+      h[0] = id.charCodeAt(0);
+      h[1] = id.charCodeAt(1);
+      h[2] = id.charCodeAt(2);
+      h[3] = id.charCodeAt(3);
+      h[4] = (data.length >> 24) & 0xff;
+      h[5] = (data.length >> 16) & 0xff;
+      h[6] = (data.length >> 8) & 0xff;
+      h[7] = data.length & 0xff;
+      const res = new Uint8Array(10 + data.length);
+      res.set(h, 0);
+      res.set(data, 10);
+      return res;
+    };
+
+    const titlePayload = new Uint8Array([
+      0x01, // UTF-16 with BOM
+      0xff,
+      0xfe, // BOM
+      84,
+      0,
+      105,
+      0,
+      116,
+      0,
+      108,
+      0,
+      101,
+      0, // "Title" in UTF-16LE
+    ]);
+    const artistPayload = new Uint8Array([0x00, ...Buffer.from('Artist', 'latin1')]);
+
+    const tit2 = makeFrame('TIT2', titlePayload);
+    const tpe1 = makeFrame('TPE1', artistPayload);
+
+    const rawBody = new Uint8Array(tit2.length + tpe1.length);
+    rawBody.set(tit2, 0);
+    rawBody.set(tpe1, tit2.length);
+
+    const unsyncedBody = unsync(rawBody);
+
+    const ss = (n: number) =>
+      new Uint8Array([(n >> 21) & 127, (n >> 14) & 127, (n >> 7) & 127, n & 127]);
+
+    const header = new Uint8Array([0x49, 0x44, 0x33, 0x03, 0x00, 0x80]); // "ID3", v2.3, flag 0x80 (unsync)
+    const tag = new Uint8Array(10 + unsyncedBody.length);
+    tag.set(header, 0);
+    tag.set(ss(unsyncedBody.length), 6);
+    tag.set(unsyncedBody, 10);
+
+    const parsed = readTags(tag);
+    expect(parsed.title).toBe('Title');
+    expect(parsed.artist).toBe('Artist');
   });
 });
 
@@ -141,7 +216,7 @@ describe('ID3 Parsing & Building', () => {
     expect(cleanedBuffer.length).toBe(fakeAudio.length);
   });
 
-  test('should write and read newly supported frames (SYLT, POPM, PRIV, UFID, CHAP, CTOC, WXXX, ETCO, COMR, GEOB, URL)', () => {
+  test('should write and read supported frames (SYLT, POPM, PRIV, UFID, CHAP, CTOC, WXXX, ETCO, COMR, GEOB, URL)', () => {
     const tags = {
       title: 'Advanced Tags',
       synchronisedLyrics: {

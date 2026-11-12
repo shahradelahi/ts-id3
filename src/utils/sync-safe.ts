@@ -43,3 +43,58 @@ export function encodeUint32(value: number): Uint8Array {
     value & 0xff,
   ]);
 }
+
+/**
+ * Remove unsynchronisation bytes from buffer (0xFF 0x00 -> 0xFF).
+ */
+export function removeUnsynchronisation(buffer: Uint8Array): Uint8Array {
+  let count = 0;
+  for (let i = 0; i < buffer.length - 1; i++) {
+    if (buffer[i] === 0xff && buffer[i + 1] === 0x00) {
+      count++;
+      i++;
+    }
+  }
+  if (count === 0) {
+    return buffer;
+  }
+  const out = new Uint8Array(buffer.length - count);
+  let j = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    out[j++] = buffer[i]!;
+    if (buffer[i] === 0xff && i + 1 < buffer.length && buffer[i + 1] === 0x00) {
+      i++;
+    }
+  }
+  return out;
+}
+
+/**
+ * Apply unsynchronisation scheme to buffer.
+ */
+export function applyUnsynchronisation(buffer: Uint8Array): Uint8Array {
+  let extra = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    if (
+      buffer[i] === 0xff &&
+      (i + 1 === buffer.length || buffer[i + 1] === 0x00 || (buffer[i + 1]! & 0xe0) === 0xe0)
+    ) {
+      extra++;
+    }
+  }
+  if (extra === 0) {
+    return buffer;
+  }
+  const out = new Uint8Array(buffer.length + extra);
+  let j = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    out[j++] = buffer[i]!;
+    if (
+      buffer[i] === 0xff &&
+      (i + 1 === buffer.length || buffer[i + 1] === 0x00 || (buffer[i + 1]! & 0xe0) === 0xe0)
+    ) {
+      out[j++] = 0x00;
+    }
+  }
+  return out;
+}

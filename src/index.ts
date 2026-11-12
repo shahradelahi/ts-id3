@@ -29,4 +29,9 @@ export type {
   ReadOptions,
   WriteOptions,
 } from './typings';
-export { decodeSyncSafe, encodeSyncSafe } from './utils/sync-safe';
+export {
+  applyUnsynchronisation,
+  decodeSyncSafe,
+  encodeSyncSafe,
+  removeUnsynchronisation,
+} from './utils/sync-safe';
