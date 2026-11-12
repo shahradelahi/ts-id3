@@ -1,6 +1,6 @@
 {
   "name": "@se-oss/id3",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A ID3 tag parser and builder for TypeScript and JavaScript.",
   "keywords": [
     "id3",
